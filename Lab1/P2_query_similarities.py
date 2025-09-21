@@ -1,11 +1,20 @@
 # P2_query_similarities.py
 import psycopg2, numpy as np, time, statistics
+import math
 from numpy.linalg import norm
 
-conn = psycopg2.connect(...)
+conn = psycopg2.connect(
+    dbname="postgres",
+    user="postgres",
+    password="1234",
+    host="localhost"  # , port=5432 si hace falta
+)
 cur = conn.cursor()
 
-cur.execute("SELECT id, sentence_text, embedding FROM sentences ORDER BY id")
+#cogemos 10 filas de la tabla con su text y sus embeddings,embeddings que seran del tipo [0.9121,0.12312312,-0.9891291283...]
+cur.execute("SELECT id, text, embedding FROM sentences ORDER BY id asc")
+
+#tenemos 10 elementos, los procesamos de forma que buscamos las 2 mas parecidas con el metodo euclidiano?
 all_rows = cur.fetchall()
 ids = [r[0] for r in all_rows]
 texts = [r[1] for r in all_rows]
@@ -15,13 +24,8 @@ embs = np.array([np.array(r[2], dtype=float) for r in all_rows])  # shape (N, D)
 query_ids = ids[:10]  # asegúrate de identificarlos en el informe
 
 
-#############3
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
-def euclidean_similarity(a, b):
-    return
 
 similarities = [(id, cosine_similarity(query, emb)) for id, emb in embeddings]
 top2 = sorted(similarities, key=lambda x: x[1], reverse=True)[:2]
