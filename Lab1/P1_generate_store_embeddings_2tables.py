@@ -1,3 +1,4 @@
+import statistics
 
 # 2 TABLAS
 
@@ -68,6 +69,7 @@ for j in range(5):
 print("Max:", max(times))
 print("Min:", min(times))
 print("Avg:", sum(times)/len(times))
+print("Standard Deviation:", statistics.stdev(times))
 
 cur.close()
 conn.close()

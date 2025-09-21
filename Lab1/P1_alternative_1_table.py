@@ -1,3 +1,5 @@
+import statistics
+
 from sentence_transformers import SentenceTransformer
 import psycopg2
 from psycopg2.extras import execute_values
@@ -24,7 +26,7 @@ rows = cur.fetchall()
 
 batch_size = 256
 times = []
-for j in range(1):
+for j in range(5):
     # Medir el tiempo de generación de embeddings
     # limpiar tabla antes de cada inserción
     start_time = time.time()
@@ -56,6 +58,7 @@ for j in range(1):
 print("Max:", max(times))
 print("Min:", min(times))
 print("Avg:", sum(times)/len(times))
+print("Standard Deviation:", statistics.stdev(times))
 
 cur.close()
 conn.close()
