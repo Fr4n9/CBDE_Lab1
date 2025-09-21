@@ -10,7 +10,7 @@ embeddings = model.encode(sentences)
 ########################################################################################
 
 
-# P1_generate_store_embeddings.py
+# P1_generate_store_embeddings_2tables.py
 from sentence_transformers import SentenceTransformer
 import psycopg2
 from psycopg2.extras import execute_values
