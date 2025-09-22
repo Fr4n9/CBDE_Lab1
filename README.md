@@ -1,5 +1,7 @@
 # CBDE_Lab1
 
+Proyecto Hecho por Adrián Ferrer Gutierrez y Francesc Pérez Venegas
+
 # Proyecto de Comparación de Bases de Datos Vectoriales
 
 Este proyecto tiene como objetivo comparar el rendimiento de diferentes enfoques para almacenar y consultar embeddings de frases, con el fin de encontrar las más similares entre sí. Se evalúan tres implementaciones principales:
