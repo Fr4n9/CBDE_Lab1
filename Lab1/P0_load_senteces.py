@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS sentences (
 """)
 conn.commit()
 
-# Leer frases del CSV y preparar los datos con IDs manuales
+# Llegim el CSV
 batch = []
 with open("bookcorpus_10k_sentences.csv", "r", encoding="utf8") as f:
     reader = csv.DictReader(f)
@@ -33,12 +33,12 @@ with open("bookcorpus_10k_sentences.csv", "r", encoding="utf8") as f:
 # Medición
 times = []
 for i in range(5):
-    # Limpiar tabla antes de cada inserción
+    # Limpiamos tabla
     cur.execute("DELETE FROM sentences")
     conn.commit()
 
     start_time = time.time()
-    # 2. Insertar IDs y textos
+    # Insertamos IDs y textos
     execute_values(cur,
         "INSERT INTO sentences (id, text) VALUES %s",
         batch
