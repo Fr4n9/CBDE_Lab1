@@ -14,7 +14,7 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# Carga el modelo de Hugging Face
+# Carreguem el model que ens diu el document de HuggingFace
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Selecciona todas las oraciones de la tabla
@@ -46,7 +46,7 @@ for j in range(5):
         ids = [r[0] for r in batch]
         texts = [r[1] for r in batch]
 
-        # Generar embeddings
+        # generem embeddings
         embeds = model.encode(texts, convert_to_numpy=True)
 
         # Preparar datos como (id, embedding)

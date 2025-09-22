@@ -1,21 +1,15 @@
 import statistics
-
-from sentence_transformers import SentenceTransformer
-import psycopg2
+import psycopg2, time
 from psycopg2.extras import execute_values
-import time
+from sentence_transformers import SentenceTransformer
 
 conn = psycopg2.connect(
     dbname="postgres",
     user="postgres",
     password="1234",
-    host="localhost"  # , port=5432 si hace falta
+    host="localhost"
 )
 cur = conn.cursor()
-
-# Se añade la columna 'embedding' si no existe.
-cur.execute("ALTER TABLE sentences ADD COLUMN IF NOT EXISTS embedding double precision[];")
-conn.commit()
 
 # Carreguem el model que ens diu el document de HuggingFace
 model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -23,36 +17,40 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 # Selecciona todas las oraciones de la tabla
 cur.execute("SELECT id, text FROM sentences")
 rows = cur.fetchall()
+conn.commit()
 
 batch_size = 256
 times = []
+
 for j in range(5):
-    # Medir el tiempo de generación de embeddings
-    # limpiar tabla antes de cada inserción
     start_time = time.time()
     for i in range(0, len(rows), batch_size):
         batch = rows[i:i + batch_size]
         ids = [r[0] for r in batch]
         texts = [r[1] for r in batch]
+
         # generem embeddings
         embeds = model.encode(texts, convert_to_numpy=True)
 
-        # Preparar los datos para la actualización
-        # La lista de tuplas debe ser (vector, id) para que el UPDATE funcione
-        # De esta forma, el 'id' se utiliza para identificar la fila a actualizar
-        updates = [(list(map(float, emb)), id_) for id_, emb in zip(ids, embeds)]
+        # Preparem els registres en l'ordre correcta
+        records = [(ids[k], embeds[k].tolist()) for k in range(len(ids))]
 
-        # Medir el tiempo de actualización de la base de datos
-        #t0 = time.perf_counter()
         execute_values(
             cur,
-            "UPDATE sentences s SET embedding = t.embedding FROM (VALUES %s) AS t (embedding, id) WHERE s.id = t.id",
-            updates
+            """
+            UPDATE sentences s
+            SET embedding = t.embedding
+            FROM (VALUES %s) AS t(id, embedding)
+            WHERE s.id = t.id
+            """,
+            records
         )
-        conn.commit()
+
+    conn.commit()
     end_time = time.time()
     elapsed = end_time - start_time
     times.append(elapsed)
+    print(f"Iteración {j+1}: {elapsed:.2f} segundos")
 
 # Estadísticas
 print("Max:", max(times))
@@ -62,4 +60,3 @@ print("Standard Deviation:", statistics.stdev(times))
 
 cur.close()
 conn.close()
-
