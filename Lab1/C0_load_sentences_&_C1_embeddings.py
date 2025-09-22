@@ -1,10 +1,20 @@
 import statistics
 
 import chromadb
+from chromadb.utils import embedding_functions
+
 import csv, time
 
+#forcem aquest model de transformer per a que el rendiment sigui similar als scripts de P0,p1 i p2, sino triga 10 vegades mes
+sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+
+
 client = chromadb.PersistentClient(path="./chroma_db")
-collection = client.get_or_create_collection(name="sentences")
+client.delete_collection(name="sentences")
+
+collection = client.get_or_create_collection(name="sentences",
+                                             embedding_function=sentence_transformer_ef
+                                             )
 
 texts = []
 with open("bookcorpus_10k_sentences.csv", "r", encoding="utf8") as f:
